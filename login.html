@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+    Body {
+        font-family: Calibri, Helvetica, sans-serif;
+        background-color: white;
+    }
+
+    input[type=button] {
+        background-color: #4CAF50;
+        width: 100%;
+        color: white;
+        padding: 15px;
+        margin: 10px 0px;
+        border: none;
+        cursor: pointer;
+    }
+
+    form {
+        border: 3px solid #f1f1f1;
+    }
+
+    input[type=text],
+    input[type=password] {
+        width: 100%;
+        margin: 8px 0;
+        padding: 12px 20px;
+        display: inline-block;
+        border: 2px solid green;
+        box-sizing: border-box;
+    }
+
+    input[type=button]:hover {
+        opacity: 0.7;
+    }
+
+
+    .container {
+        padding: 25px;
+        background-color: lightblue;
+    }
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Change Password</h1>
+        <form name="keyForm" id="keyForm" method="post" action="http://localhost:8000/?action=login">
+            <input class="input_fields" type="text" id="name" name="name" placeholder="Username/email" autofocus><br><br>
+            <input class="input_fields" type="password" id="password" name="password" placeholder="Password"><br><br>
+            <input class="input_fields" type="password" id="old_api_key" name="old_api_key" placeholder="Old API Key"><br><br>
+            <input class="input_fields" type="password" id="new_api_key" name="new_api_key" placeholder="New API Key"><br><br>
+            <input class="input_fields" type="button" name="submitbtn" value="Submit" onclick="submitFunction()">
+        </form>
+    </div>
+    <p style="color: red;" id="er"></p>
+</body>
+
+</html>
+
+<script>
+    function submitFunction() {
+        var name = document.forms["keyForm"]["name"].value;
+        var password = document.forms["keyForm"]["password"].value;
+        var old_api_key = document.forms["keyForm"]["old_api_key"].value;
+        var new_api_key = document.forms["keyForm"]["new_api_key"].value;
+
+
+        if (name == "" || password == "" || old_api_key == "" || new_api_key == "") {
+            document.getElementById("er").innerHTML = 'Please fill the out the form!';
+            return false;
+        } else if (new_api_key.length < 32) {
+            document.getElementById("er").innerHTML = 'API Key must be at least 32 characters!';
+            return false;
+        } else {
+            console.log(name)
+            var frm = document.getElementById("keyForm");
+            frm.submit();
+            frm.reset();
+            return false;
+        }
+    }
+</script>

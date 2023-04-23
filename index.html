@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ReportBro Designer</title>
+    <link rel="stylesheet" href="dist/reportbro.css" />
+    <script src="dist/jquery.min.js"></script>
+    <script src="dist/reportbro.js"></script>
+</head>
+
+<body>
+    <button onclick="TESTpreview()">Test Preview</button>
+    
+    <button onclick="saveTemplate()">Save Template</button>
+    <div id="reportbro"></div>
+</body>
+
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        rb = $("#reportbro").reportBro({
+            menuShowDebug: false
+        });
+
+        TESTpreview = function () {
+            data = { testing: 'Hello world', apikey: 'n8vownfp_93wrpA939p)q0p3kfr_jf32p-29rq0fkscmla1' };
+            previewInternal(data, false);
+        }
+
+        saveTemplate = function () {
+            var temple = JSON.stringify(this.rb.getReport());
+
+            var bb = new Blob([temple], { type: 'text/plain' });
+            var a = document.createElement('a');
+            a.href = window.URL.createObjectURL(bb);
+            a.download = 'download.txt';
+            a.click();
+        };
+
+
+        previewInternal = function (data, isTestData) {
+            const self = rb;
+            const requestParams = rb.getRequestParameters();
+
+            // clear all previous errors
+            rb.clearErrors();
+
+            // use headers from properties and set basic auth header if basic auth info is available
+            let headers = requestParams.reportServerHeaders;
+            if (requestParams.reportServerBasicAuth) {
+                headers['Authorization'] = 'Basic ' + btoa(
+                    requestParams.reportServerBasicAuth.username + ':' + requestParams.reportServerBasicAuth.password);
+            }
+
+            rb.showLoading();
+
+            $.ajax(requestParams.reportServerUrl, {
+                data: JSON.stringify({
+                    report: rb.getReport(),
+                    outputFormat: 'pdf',
+                    data: data,
+                    isTestData: isTestData,
+                }),
+                type: "PUT", contentType: "application/json",
+                headers: headers,
+                timeout: requestParams.reportServerTimeout,
+                crossDomain: requestParams.reportServerUrlCrossDomain,
+                success: function (data) {
+                    self.hideLoading();
+
+                    if (data.substr(0, 4) === 'key:') {
+                        self.reportKey = data.substr(4);
+                        self.getDocument().openPdfPreviewTab(
+                            requestParams.reportServerUrl + '?key=' + self.reportKey + '&outputFormat=pdf', headers);
+                    } else if (data.substr(0, 4) === 'Err:') {
+                        alert(data.substr(4));
+                    }
+                    else {
+                        self.reportKey = null;
+                        try {
+                            let obj = JSON.parse(data);
+                            if (obj.errors.length > 0) {
+                                if (obj.errors[0].auth_error) {
+                                    alert(obj.errors[0].auth_error);
+                                } else {
+                                    console.log(obj.errors);
+                                    self.processErrors(obj.errors, false);
+                                }
+                            }
+                        } catch (e) {
+                            alert('preview failed');
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    self.hideLoading();
+                    if (textStatus === "timeout") {
+                        alert('preview failed (timeout)');
+                    } else {
+                        alert('preview failed : ' + textStatus);
+                    }
+                }
+            });
+        }
+
+        function isJson(str) {
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }
+    });
+
+
+</script>

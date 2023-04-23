@@ -1,1 +1,2 @@
-# Parkinson_Disease_Detection
+# COM-504_2020a1r045
+Repository For Internship Project
